@@ -41,7 +41,11 @@ const EditProfile = () => {
             formData.append("contact", userData.contact)
             formData.append("location", userData.location)
 
-            const headers = { "Content-Type": "multipart/form-data" }
+            const token = localStorage.getItem("token");
+            const headers = {
+                "Content-Type": "multipart/form-data",
+                "authorization": `Bearer ${token}`
+            };
             const response = await editUserDetails(userData?.userId, formData, headers)
             if (response.status === 200) {
                 alert("Profile updated successfully!");

@@ -1,4 +1,4 @@
-import { data } from "autoprefixer"
+
 import { baseUrl } from "./baseUrl"
 import { commonApi } from "./commonApi"
 
@@ -28,6 +28,11 @@ export const editUserDetails = async (userId,userData,headers) => {
   };
   
 
-  export const getAllAds = async (data) => {
-    return await commonApi("GET", `${baseUrl}getAllAds`,data);
+  export const getAllAds = async (body) => {
+    return await commonApi("GET", `${baseUrl}getAllAds`,body);
   };
+  
+  // export const updateAd = async (adId, data, headers) => {
+  //   return await commonApi("PUT", `${baseUrl}updateAd/${adId}`, data, headers);
+  // };
+  

@@ -1,89 +1,61 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
- export const categoryOptions = {
-    Electronics: ["Mobiles", "Laptops", "Cameras", "Accessories"],
-    Vehicles: ["Cars", "Bikes", "Trucks", "Scooters"],
-    "Real Estate": ["Apartments", "Houses", "Land", "Commercial"],
-    Jobs: ["IT", "Sales", "Marketing", "Customer Support"],
-    Services: ["Cleaning", "Tutoring", "Repair", "Catering"],
-};
+const Category = () => {
+    const [category, setCategory] = useState('')
+    const [subcategory, setSubcategory] = useState('')
+    const navigate= useNavigate()
+    const location = useLocation();
 
-const PostAd = () => {
-    const [adDetails, setAdDetails] = useState({
-        category: "",
-        subcategory: "",
-    });
-    const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        if (name === "category") {
-            setAdDetails({ category: value, subcategory: "" }); // reset subcategory when category changes
-        } else {
-            setAdDetails({ ...adDetails, [name]: value });
-        }
+    const handleSubmit = () => {
+       
+        navigate('/ad', {
+            state: { category , subcategory  }
+        });
+        
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Ad Posted:", adDetails);
-        navigate("/ad");
-    };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-            <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">Post Your Ad</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-600 font-medium">Category:</label>
-                        <select
-                            name="category"
-                            className="w-full px-3 py-2 border rounded-md"
-                            value={adDetails.category}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select a category</option>
-                            {Object.keys(categoryOptions).map((cat) => (
-                                <option key={cat} value={cat}>
-                                    {cat}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+        <div>
+            <div className="p-6 bg-white rounded-lg shadow-md w-96">
+                <h2 className="text-xl font-bold mb-4">Post Your Ad</h2>
 
-                    {adDetails.category && (
-                        <div className="mb-4">
-                            <label className="block text-gray-600 font-medium">Subcategory:</label>
-                            <select
-                                name="subcategory"
-                                className="w-full px-3 py-2 border rounded-md"
-                                value={adDetails.subcategory}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select a subcategory</option>
-                                {categoryOptions[adDetails.category].map((sub) => (
-                                    <option key={sub} value={sub}>
-                                        {sub}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                <select
+                    className="w-full p-2 border rounded-md"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                >
+                    <option value="">Select Category</option>
+                    <option value="Vehicles">Vehicles</option>
+                    
+                </select>
+
+                <select
+                    className="w-full p-2 border rounded-md mt-2"
+                    value={subcategory}
+                    onChange={(e) => setSubcategory(e.target.value)}
+                >
+                    <option value="">Select Subcategory</option>
+                    {category === "Vehicles" && (
+                        <>
+                            <option value="Cars">Cars</option>
+                            <option value="Bikes">Bikes</option>
+                        </>
                     )}
+                    
+                </select>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition"
-                    >
-                        Submit Ad
-                    </button>
-                </form>
+                <div className="mt-4">
+                    <p className="text-gray-700">Selected: {category} / {subcategory}</p>
+                </div>
+
+                <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md" onClick={handleSubmit}>
+                    Submit Ad
+                </button>
             </div>
         </div>
     );
 };
 
-export default PostAd;
+export default Category;

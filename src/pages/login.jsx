@@ -9,7 +9,7 @@ const Login = () => {
 
     
     const [userDetails, setUserDetails] = useState({
-        name: "",
+         name: "",
         email: "",
         password: ""
     })
@@ -64,7 +64,7 @@ const Login = () => {
 
                dispatch(updateIsLoggedIn(true))
              
-               navigate('/home');
+               navigate('/profilepage');
               
             } else {
                 errorNotification()

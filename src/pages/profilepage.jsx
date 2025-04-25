@@ -61,6 +61,16 @@ const Profile = () => {
                     Start Selling 🚀
                 </button>
             </div>
+
+            <button
+                type="button"
+                onClick={() => navigate("/mylistings")}
+                className="w-full bg-gray-300 text-gray-800 py-2 rounded-md mb-4"
+            >
+                View My Listings
+            </button>
+
+
         </div>
 
     )

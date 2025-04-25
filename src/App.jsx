@@ -5,7 +5,7 @@ import './App.css'
 
 import Login from './pages/login'
 import Home from './pages/home'
-import ProductCard from './component/product'
+
 import ProductDetails from './pages/productDetails'
 import Register from './pages/register'
 import ProtectedRoute from './provider/protectedroute'
@@ -15,7 +15,8 @@ import Profile from './pages/profilepage'
 import EditProfile from './pages/editprofile'
 
 import Ads from './pages/ad'
-import PostAd from './pages/category'
+
+import Category from './pages/category'
 
 
 
@@ -35,7 +36,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profilepage" element={<Profile/>}/>
         <Route path="/editprofile" element={<EditProfile/>}/>
-        <Route path="/category" element={<PostAd/>}/>
+        <Route path="/category" element={<Category/>}/>
         <Route path="/ad" element={<Ads/>}/>
         
 
