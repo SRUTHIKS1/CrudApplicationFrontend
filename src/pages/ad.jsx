@@ -31,6 +31,7 @@ const Ads = () => {
   }, [userData])
 
   const [formData, setFormData] = useState({
+    adId: '',
     brand: '',
     year: '',
     fuel: '',

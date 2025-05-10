@@ -1,107 +1,162 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { search } from "../Apiservice/allApi";
 
-const Navbar = () => {
-  const [user, setUser] = useState(null);
+const Navbar = ({setSearchResult}) => {
   const navigate = useNavigate();
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Toggle language dropdown
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  // Check login status on component mount
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("userCredential"));
-    if (storedUser) {
-      setUser(storedUser);
-    }
+    const userToken = localStorage.getItem('token');
+    setIsLoggedIn(!!userToken);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("userCredential");
-    localStorage.removeItem("token");
-    navigate("/login");
-    window.location.reload(); // ensures UI refresh
-  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const closeDropdown = (e) => {
+      if (!e.target.closest(".dropdown")) setIsOpen(false);
+    };
+    document.addEventListener("click", closeDropdown);
+    return () => document.removeEventListener("click", closeDropdown);
+  }, []);
 
-  return (
-    <div className="bg-slate-100 flex flex-col sticky top-0 z-50">
-      <nav className="bg-slate shadow-md p-4 flex justify-between items-center">
-        {/* OLX Logo */}
-        <div>
+  // Handle search input change
+  const handleSearchChange = async (e) => {
+    const searchQuery = e.target.value;
+    setQuery(searchQuery);
+
+    if (searchQuery.trim() === '') {
+      setResults([]);
+      return;
+    }
+
+    try {
+      const data = await search(searchQuery);
+      console.log(data.data.items)
+      setSearchResult(data.data.items);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setResults([]);
+    }
+  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const closeDropdown = (e) => {
+      if (!e.target.closest(".dropdown")) {
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener("click", closeDropdown);
+    return () => document.removeEventListener("click", closeDropdown);
+  }, []);
+  
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/login');
+  };
+  
+  return(
+    <nav className="sticky top-0 bg-gray-100 text-black p-2 shadow-md z-50">
+      <div className="container mx-auto flex items-center justify-between gap-x-4 flex-wrap">
+
+        {/* Logo */}
+         {/* OLX Logo */}
+         <div>
           <img src="olx.jpg" className="w-11 h-11" alt="OLX" />
         </div>
 
-        {/* Location Search */}
-        <div className="flex border rounded-md overflow-hidden">
-          <input className="px-2" placeholder="Search city, area or locality" defaultValue="India" />
-          <button type="button">
-            <svg className="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-            </svg>
-          </button>
+        {/* Location Search Input (non-functional placeholder) */}
+        <div className="flex items-center border rounded-lg overflow-hidden px-2">
+          <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 21l-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search locations..."
+            className="px-2 py-1 focus:outline-none"
+          />
         </div>
 
         {/* Product Search */}
-        <div className="flex border-2 rounded-md overflow-hidden w-1/3">
-          <input type="text" placeholder="Search products..." className="px-4 py-2 w-full focus:outline-none" />
-          <button className="bg-slate-200 text-white px-4 py-2">
-            <svg className="w-6 h-6 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-            </svg>
-          </button>
+        <div className="relative w-1/3 min-w-[250px]">
+          <div className="flex border rounded-lg items-center px-2">
+            <input
+              type="text"
+              value={query}
+              onChange={handleSearchChange}
+              placeholder="Search for items"
+              className="w-full px-2 py-1 focus:outline-none"
+            />
+            <button title="Search">
+              <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 21l-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Language Selector */}
-        <div className="flex items-center">
-          ENGLISH
-          <button>
-            <svg className="w-7 h-4 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m8 10 4 4 4-4" />
+        {/* Language Dropdown */}
+        <div className="relative dropdown">
+          <button onClick={toggleDropdown} className="flex items-center font-medium">
+            <span className="mr-1">ENGLISH</span>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M19.5 8.25l-7.5 7.5-7.5-7.5" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-        </div>
-
-        {/* Heart / Wishlist */}
-        <div>
-          <button>
-            <svg className="w-[34px] h-[34px] text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12.01 6.001C6.5 1 1 8 5.782 13.001L12.011 20l6.23-7C23 8 17.5 1 12.01 6.002Z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Profile/Login */}
-        <div className="flex items-center space-x-4">
-          {user ? (
-            <div className="relative group">
-              <button className="text-gray-700 font-semibold">
-                {user.name}
-              </button>
-              <div className="absolute hidden group-hover:block ...">
-
-                <button
-                  onClick={() => navigate("/profilepage")}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                >
-                  My Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
+          {isOpen && (
+            <div className="absolute mt-2 w-40 bg-white shadow-lg rounded-lg">
+              <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">English</button>
+              <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">Hindi</button>
             </div>
-          ) : (
-            <a href="/login" className="text-gray-700 font-semibold">
-              Login
-            </a>
           )}
         </div>
 
-        {/* Sell */}
-        <div>
-          <a href="/postyourAd" className="text-green-600 font-semibold">Sell</a>
+        {/* Wishlist Icon */}
+        <button title="Wishlist">
+          <svg className="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 8.25c0-2.5-2.1-4.5-4.7-4.5-1.9 0-3.6 1.1-4.3 2.7-0.7-1.6-2.4-2.7-4.3-2.7-2.6 0-4.7 2-4.7 4.5 0 7.2 9 12 9 12s9-4.8 9-12z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
+        {/* Profile / Login */}
+        <div className="underline font-semibold">
+          <Link to="/profilepage">Profile</Link>
         </div>
-      </nav>
-    </div>
+        
+        {/* Login/Logout Button */}
+        <div className="underline font-semibold">
+          {isLoggedIn ? (
+            <button onClick={handleLogout}>Logout</button>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
+        </div>
+
+        {/* Sell Button */}
+        <div>
+          <button
+            onClick={() => navigate("/ad")}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500 flex items-center font-semibold"
+          >
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 4.5v15m7.5-7.5h-15" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            SELL
+          </button>
+        </div>
+      </div>
+    </nav>
   );
 };
 

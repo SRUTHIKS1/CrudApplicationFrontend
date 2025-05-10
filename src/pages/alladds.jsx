@@ -1,21 +1,40 @@
-// import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { getAllAds } from "../Apiservice/allApi";
+import ProductCard from "../component/productCard";
 
-// const ProductCard = ({ adds }) => {
-//     // if (!adds) return null; // or a placeholder, or fallback UI
-//     const navigate = useNavigate()
-//     return (
-//         <div className="border p-4 rounded-lg shadow" onClick={() => { navigate("/productDetails", { state: { adds } }) }}>
-//             {adds?.image && adds?.image?.length > 0 && (
-//                 <img
-//                     src={http://localhost:3000${adds?.image[0]}}
-//             alt={adds?.title}
-//             className="h-40 w-full object-cover rounded mb-2"
-//                 />
-//             )}
-//             <h2 className="text-xl font-bold">{adds?.title}</h2>
-//             <p className="text-gray-700">{adds?.description}</p>
-//             <p className="text-green-600 font-semibold">₹{adds?.price}</p>
-//         </div>
-//     );
-// };
-// export default ProductCard
+const AllAd = ({ searchResult }) => {
+  const [adds, setAdds] = useState([]);
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const res = await getAllAds();
+        setAdds(res.data);
+      } catch (err) {
+        console.error("Error fetching ads:", err);
+      }
+    };
+
+    if (searchResult?.length > 0) {
+      setAdds(searchResult);
+    } else {
+      fetchAds();
+    }
+  }, [searchResult]);
+
+  return (
+    <>
+      {adds.length === 0 ? (
+        <div className="text-center text-gray-500 mt-12">No ads found.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {adds.map((ad, index) => (
+            <ProductCard key={index} adds={ad} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
+
+export default AllAd;
