@@ -39,7 +39,7 @@ export const editUserDetails = async (userId,userData,headers) => {
   }
   
   export const getUserAds = async (userId) => {
-    return await commonApi("GET", `${baseUrl}getAdsOfUser/${userId}`,{});
+    return await commonApi("GET", `${baseUrl}getUsersAds/${userId}`,{});
 
 };
 
@@ -51,6 +51,9 @@ export const search = async (query) => {
   return await commonApi("GET", `${baseUrl}search/${query}`, {});
 };
 
+export const searchByLocation = async (location) => {
+  return await commonApi("GET", `${baseUrl}search/location/${location}`, {});
+};
 
 
 export const deleteAd = async (adId, headers) => {
@@ -66,4 +69,20 @@ export const resetPasswordRequest = async (data) => {
 
 export const resetPassword = async (token, data) => {
   return await commonApi("POST", `${baseUrl}resetPassword/${token}`, data);
+};
+
+export const getFavorites = async (userId, headers) => {
+  return await commonApi("GET", `${baseUrl}getFavorites/${userId}`, {}, headers);
+};
+export const addToFavorites = async (userId, adId, headers) => {
+  return await commonApi("POST", `${baseUrl}addToFavorites/${userId}/${adId}`, {}, headers);
+};
+
+export const removeFromFavorites = async (userId, adId, headers) => {
+  return await commonApi("DELETE", `${baseUrl}removeFromFavorites/${userId}/${adId}`, {}, headers);
+};
+
+
+export const contactSeller = async ({ adId, ...data }) => {
+  return await commonApi("POST", `${baseUrl}contactSeller/${adId}`, data);
 };

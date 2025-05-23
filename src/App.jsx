@@ -17,6 +17,11 @@ import ForgotPassword from './pages/forgotPassword';
 import ResetPassword from './pages/resetPassword';
 import AllAd from './pages/alladds';
 
+
+import Favorites from './pages/favorites';
+import ContactSeller from './pages/contactSeller';
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -31,7 +36,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/resetPassword/:token" element={<ResetPassword />} />
-          <Route path="/productDetails" element={<ProductDetails />} />
+         <Route path="/contactSeller/:adId" element={<ContactSeller/>} />
+
+
+          {/* <Route path="/productDetails" element={<ProductDetails />} /> */}
 
           {/* Protected Routes */}
           <Route path="/home" element={
@@ -39,6 +47,18 @@ function App() {
               <Home />
             </ProtectedRoute>
           } />
+
+          < Route path="/productDetails" element={
+            <ProtectedRoute>
+              <ProductDetails />
+            </ProtectedRoute>
+          } />
+          < Route path="/favorites" element={
+            <ProtectedRoute>
+              <Favorites />
+            </ProtectedRoute>
+          } />
+
 
           <Route path="/profilepage" element={
             <ProtectedRoute>
@@ -70,11 +90,17 @@ function App() {
             </ProtectedRoute>
           } />
 
+
+
+
           <Route path="/alladds" element={
             <ProtectedRoute>
               <AllAd />
             </ProtectedRoute>
           } />
+          
+
+          
 
         </Routes>
       </Provider>

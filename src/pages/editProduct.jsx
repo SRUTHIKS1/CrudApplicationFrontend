@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getAdById, updateAd } from "../Apiservice/allApi";
 
+
+
 const EditProduct = () => {
   const { adId } = useParams(); // Get ad ID from URL parameters
   const navigate = useNavigate();
@@ -126,7 +128,7 @@ const EditProduct = () => {
 
     try {
       const headers = { "Content-Type": "multipart/form-data" };
-      const res = await updateAd(adId,adData,headers);
+      const res = await updateAd(adId, adData, headers);
 
       console.log("API response:", res); // Log the response
 
@@ -152,6 +154,8 @@ const EditProduct = () => {
   }
 
   return (
+    <>
+
     <form onSubmit={handleSubmit}>
       <div className="flex justify-center p-6 bg-gray-100 min-h-screen">
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
@@ -302,7 +306,8 @@ const EditProduct = () => {
           </div>
         </div>
       </div>
-    </form>
+    </form></>
+
   );
 };
 
