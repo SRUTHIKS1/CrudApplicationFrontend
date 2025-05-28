@@ -71,18 +71,16 @@ export const resetPassword = async (token, data) => {
   return await commonApi("POST", `${baseUrl}resetPassword/${token}`, data);
 };
 
-export const getFavorites = async (userId, headers) => {
-  return await commonApi("GET", `${baseUrl}getFavorites/${userId}`, {}, headers);
-};
 export const addToFavorites = async (userId, adId, headers) => {
-  return await commonApi("POST", `${baseUrl}addToFavorites/${userId}/${adId}`, {}, headers);
+  if (!userId || !adId) {
+    throw new Error("Missing userId or adId");
+  }
+  return await commonApi("POST",`${baseUrl}favorites/add`, { userId, adId }, {headers});
 };
 
 export const removeFromFavorites = async (userId, adId, headers) => {
-  return await commonApi("DELETE", `${baseUrl}removeFromFavorites/${userId}/${adId}`, {}, headers);
-};
-
-
-export const contactSeller = async ({ adId, ...data }) => {
-  return await commonApi("POST", `${baseUrl}contactSeller/${adId}`, data);
+  if (!userId || !adId) {
+    throw new Error("Missing userId or adId");
+  }
+  return await commonApi("POST", `${baseUrl}favorites/remove`, { userId, adId }, headers);
 };
