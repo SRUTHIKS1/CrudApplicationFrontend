@@ -82,9 +82,20 @@ const Login = () => {
         notify("success", "Successfully logged in!");
 
         // Store user data and token securely (consider cookies for token)
-        const { userId, name, email } = result.data.userDetails;
-        localStorage.setItem("userCredential", JSON.stringify({ userId, name, email }));
-        localStorage.setItem("token", result.data.token);
+        const { userId, name, email, favorites = [] } = result.data.userDetails;
+const token = result.data.token;
+
+localStorage.setItem(
+  "userCredential",
+  JSON.stringify({
+    userId,
+    name,
+    email,
+    token,
+    favorites
+  })
+);
+
 
         dispatch(updateIsLoggedIn(true));
         navigate("/home");

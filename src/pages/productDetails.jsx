@@ -100,49 +100,74 @@ const ProductDetails = () => {
   };
 
   const handleFavorite = async () => {
-    try {
-      const userCredential = localStorage.getItem("userCredential");
+  try {
+    const userCredential = localStorage.getItem("userCredential");
 
-      if (!userCredential) {
-        alert("Please login to add to favorites");
-        return;
-      }
-
-      const parsedCredentials = JSON.parse(userCredential);
-      const userId = parsedCredentials.userId;
-
-      if (!userId) {
-        alert("User authentication error. Please login again.");
-        return;
-      }
-
-      setLoading(true);
-
-      if (isFavorited) {
-        await removeFromFavorites(userId, adds.adId);
-        const updatedCredentials = {
-          ...parsedCredentials,
-          favorites: (parsedCredentials.favorites || []).filter(id => id !== adds.adId)
-        };
-        localStorage.setItem("userCredential", JSON.stringify(updatedCredentials));
-        setIsFavorited(false);
-      } else {
-        await addToFavorites(userId, adds.adId);
-        const updatedCredentials = {
-          ...parsedCredentials,
-          favorites: [...(parsedCredentials.favorites || []), adds.adId]
-        };
-        localStorage.setItem("userCredential", JSON.stringify(updatedCredentials));
-        setIsFavorited(true);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.error("Error updating favorites:", err);
-      alert(err.response?.data?.message || "Failed to update favorites");
-      setLoading(false);
+    if (!userCredential) {
+      alert("Please login to add to favorites");
+      return;
     }
-  };
+
+    let parsedCredentials;
+    try {
+      parsedCredentials = JSON.parse(userCredential);
+    } catch {
+      alert("User data corrupted. Please login again.");
+      localStorage.removeItem("userCredential");
+      return;
+    }
+
+    const { userId, token, favorites = [] } = parsedCredentials;
+
+    console.log("userId:", userId);
+    console.log("token:", token);
+
+    if (!userId || !token) {
+      alert("User authentication error. Please login again.");
+      localStorage.removeItem("userCredential");
+      return;
+    }
+
+    setLoading(true);
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+
+    if (isFavorited) {
+      await removeFromFavorites(userId, adds.adId, headers);
+
+      const updatedFavorites = favorites.filter((id) => id !== adds.adId);
+
+      localStorage.setItem(
+        "userCredential",
+        JSON.stringify({ ...parsedCredentials, favorites: updatedFavorites })
+      );
+
+      setIsFavorited(false);
+    } else {
+      await addToFavorites(userId, adds.adId, headers);
+
+      const updatedFavorites = [...favorites, adds.adId];
+
+      localStorage.setItem(
+        "userCredential",
+        JSON.stringify({ ...parsedCredentials, favorites: updatedFavorites })
+      );
+
+      setIsFavorited(true);
+    }
+  } catch (err) {
+    console.error("Error updating favorites:", err.response?.data || err.message || err);
+    alert(err.response?.data?.message || err.message || "Failed to update favorites");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   return (
     <>
@@ -182,7 +207,7 @@ const ProductDetails = () => {
                     <button
                       className="absolute top-4 right-4 bg-white bg-opacity-90 p-2 rounded-full shadow-md hover:bg-opacity-100 transition-all"
                       onClick={handleFavorite}
-                      disabled={isFavorited}
+                      disabled={loading}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -225,13 +250,13 @@ const ProductDetails = () => {
 
                   <div className="mt-8 flex space-x-4">
                     <button
-                      className={`${isFavorited ? "bg-gray-400" : "bg-yellow-500 hover:bg-yellow-600"
-                        } text-white font-bold py-3 px-6 rounded-lg flex-1`}
+                      className={`${isFavorited ? "bg-gray-400 hover:bg-gray-500" : "bg-yellow-500 hover:bg-yellow-600"} text-white font-bold py-3 px-6 rounded-lg flex-1 transition`}
                       onClick={handleFavorite}
-                      disabled={isFavorited}
+                      disabled={loading}
                     >
-                      {isFavorited ? "Added to Favorites" : "Add to Favorites"}
+                      {isFavorited ? "Remove from Favorites" : "Add to Favorites"}
                     </button>
+
 
                     <button
                       className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg"

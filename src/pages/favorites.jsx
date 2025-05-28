@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { getAdById } from "../Apiservice/allApi";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { getUserDetails, getAdById } from '../Apiservice/allApi';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../component/navbar';
 
 const Favorites = () => {
   const [favoriteAds, setFavoriteAds] = useState([]);
@@ -9,73 +10,78 @@ const Favorites = () => {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      const userCredential = localStorage.getItem("userCredential");
-
-      if (!userCredential) {
-        setFavoriteAds([]);
-        setLoading(false);
-        return;
-      }
-
-      const { favorites = [] } = JSON.parse(userCredential);
-      const adPromises = favorites.map(adId => getAdById(adId));
       try {
-        const responses = await Promise.all(adPromises);
-        const adsData = responses
-          .map(res => res?.data?.data)
-          .filter(adds => adds !== undefined);
-        setFavoriteAds(adsData);
+        const userData = JSON.parse(localStorage.getItem("userCredential"));
+
+        if (!userData || !userData.userId) {
+          alert("Please log in to view your favorites.");
+          navigate("/login");
+          return;
+        }
+
+        const headers = {
+          Authorization: `Bearer ${userData.token}`,
+        };
+
+        const userRes = await getUserDetails(userData.userId, headers);
+        const favoriteIds = userRes.data?.data?.favorites || [];
+
+        const adPromises = favoriteIds.map(adId => getAdById(adId));
+        const adsData = await Promise.all(adPromises);
+
+        const ads = adsData.map(res => res.data?.ad).filter(Boolean);
+        setFavoriteAds(ads);
       } catch (err) {
-        console.error("Error fetching favorite ads:", err);
+        console.error("Failed to fetch favorites:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchFavorites();
-  }, []);
+  }, [navigate]);
 
-  const handleViewAd = (adds) => {
-    navigate(`/product/${adds.adId}`, { state: { adds: adds } });
+  const handleAdClick = (ad) => {
+    navigate(`/productDetails/${ad.adId}`, { state: { adds: ad } });
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6">My Favorite Ads</h1>
+    <>
+      <Navbar />
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h2 className="text-3xl font-bold mb-6 text-center">My Favorite Ads</h2>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin h-12 w-12 border-t-4 border-blue-500 border-solid rounded-full" />
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Loading favorites...</p>
           </div>
         ) : favoriteAds.length === 0 ? (
-          <div className="text-center text-gray-600 mt-20">
-            <p className="text-xl">You have no favorite ads yet.</p>
-          </div>
+          <p className="text-center text-gray-600">You have no favorite ads yet.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {favoriteAds.map(adds => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {favoriteAds.map(ad => (
               <div
-                key={adds.adId}
-                className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition duration-300"
-                onClick={() => handleViewAd(ad)}
+                key={ad.adId}
+                className="bg-white rounded-xl shadow hover:shadow-lg cursor-pointer overflow-hidden"
+                onClick={() => handleAdClick(ad)}
               >
                 <img
-                  src={`http://localhost:3000${adds.images[0]}`}
-                  alt={adds.title}
-                  className="w-full h-48 object-cover"
+                  src={`http://localhost:3000${ad.images?.[0]}`}
+                  alt={ad.title}
+                  className="h-48 w-full object-cover"
                 />
                 <div className="p-4">
-                  <h2 className="text-xl font-semibold text-gray-800">{adds.title}</h2>
-                  <p className="text-green-600 font-bold mt-2">₹{adds.price.toLocaleString()}</p>
-                  <p className="text-sm text-gray-500 mt-1">{adds.brand} | {adds.year}</p>
+                  <h3 className="text-xl font-semibold text-gray-900">{ad.title}</h3>
+                  <p className="text-green-600 font-bold mt-2">₹{ad.price?.toLocaleString()}</p>
+                  <p className="text-sm text-gray-500 mt-1">{ad.brand} • {ad.year}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 
