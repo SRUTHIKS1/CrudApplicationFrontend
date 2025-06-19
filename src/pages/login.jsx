@@ -82,20 +82,14 @@ const Login = () => {
         notify("success", "Successfully logged in!");
 
         // Store user data and token securely (consider cookies for token)
-        const { userId, name, email, favorites = [] } = result.data.userDetails;
-const token = result.data.token;
-
-localStorage.setItem(
-  "userCredential",
-  JSON.stringify({
-    userId,
-    name,
-    email,
-    token,
-    favorites
-  })
-);
-
+        const userCredentials = {
+                   userId: result.data.userDetails.userId,
+                    name: result.data.userDetails.name,
+                    email: result.data.userDetails.email,
+                    password: result.data.userDetails.password,
+                }
+                localStorage.setItem("userCredential", JSON.stringify(userCredentials))
+                localStorage.setItem("token", JSON.stringify(result.data.token))
 
         dispatch(updateIsLoggedIn(true));
         navigate("/home");
@@ -193,9 +187,8 @@ localStorage.setItem(
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-3 rounded-md font-semibold text-white transition-colors duration-200 ${
-              isLoading ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-            } flex items-center justify-center`}
+            className={`w-full py-3 rounded-md font-semibold text-white transition-colors duration-200 ${isLoading ? "bg-indigo-300 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+              } flex items-center justify-center`}
             aria-label={isLoading ? "Logging in" : "Login"}
           >
             {isLoading ? (

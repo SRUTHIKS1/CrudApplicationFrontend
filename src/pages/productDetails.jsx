@@ -100,72 +100,72 @@ const ProductDetails = () => {
   };
 
   const handleFavorite = async () => {
-  try {
-    const userCredential = localStorage.getItem("userCredential");
+        try {
+            const userCredentials = localStorage.getItem("userCredential");
 
-    if (!userCredential) {
-      alert("Please login to add to favorites");
-      return;
-    }
+            if (!userCredentials) {
+                alert("Please login to add to favorites");
+                return;
+            }
 
-    let parsedCredentials;
-    try {
-      parsedCredentials = JSON.parse(userCredential);
-    } catch {
-      alert("User data corrupted. Please login again.");
-      localStorage.removeItem("userCredential");
-      return;
-    }
+            const parsedCredentials = JSON.parse(userCredentials);
+            const userId = parsedCredentials.userId;
 
-    const { userId, token, favorites = [] } = parsedCredentials;
+            if (!userId) {
+                alert("User authentication error. Please login again.");
+                return;
+            }
 
-    console.log("userId:", userId);
-    console.log("token:", token);
+            setLoading(true);
+            console.log("Current favoritStatus:", isFavorited);
+            console.log("UserId:", userId);
+            console.log("AdId:", adds.adId);
 
-    if (!userId || !token) {
-      alert("User authentication error. Please login again.");
-      localStorage.removeItem("userCredential");
-      return;
-    }
 
-    setLoading(true);
+            if (isFavorited) {
+                const body = {
+                    "userId": userId,
+                    "adId": adds.adId
+                }
+                //     // Remove from favorites
+                await removeFromFavorites(body);
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+                // Update local storage favorites
+                const updatedCredentials = {
+                    ...parsedCredentials,
+                    favorites: (parsedCredentials.favorites || []).filter(id => id !== adds.adId)
+                };
+                localStorage.setItem("userCredential", JSON.stringify(updatedCredentials));
+
+                setIsFavorited(!isFavorited);
+
+            } else {
+                // const body={userId,"adId":adds.adId}
+                const body = {
+                    "userId": userId,
+                    "adId": adds.adId
+                }
+                //Add to favorites
+                await addToFavorites(body);
+
+                // Update local storage favorites
+                const updatedCredentials = {
+                    ...parsedCredentials,
+                    favorites: [...(parsedCredentials.favorites || []), adds.adId]
+                };
+                localStorage.setItem("userCredential", JSON.stringify(updatedCredentials));
+
+                setIsFavorited(isFavorited);
+
+            }
+
+            setLoading(true);
+        } catch (err) {
+            console.error("Error updating favorites:", err);
+            alert(err.response?.data?.message || "Failed to update favorites");
+            setLoading(false);
+        }
     };
-
-    if (isFavorited) {
-      await removeFromFavorites(userId, adds.adId, headers);
-
-      const updatedFavorites = favorites.filter((id) => id !== adds.adId);
-
-      localStorage.setItem(
-        "userCredential",
-        JSON.stringify({ ...parsedCredentials, favorites: updatedFavorites })
-      );
-
-      setIsFavorited(false);
-    } else {
-      await addToFavorites(userId, adds.adId, headers);
-
-      const updatedFavorites = [...favorites, adds.adId];
-
-      localStorage.setItem(
-        "userCredential",
-        JSON.stringify({ ...parsedCredentials, favorites: updatedFavorites })
-      );
-
-      setIsFavorited(true);
-    }
-  } catch (err) {
-    console.error("Error updating favorites:", err.response?.data || err.message || err);
-    alert(err.response?.data?.message || err.message || "Failed to update favorites");
-  } finally {
-    setLoading(false);
-  }
-};
-
 
 
 
