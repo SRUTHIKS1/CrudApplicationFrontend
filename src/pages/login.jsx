@@ -94,7 +94,7 @@ const Login = () => {
         dispatch(updateIsLoggedIn(true));
         navigate("/home");
       } else {
-        notify("error", "Login failed. Please check your credentials.");
+        notify("error", "Login failed. Please checking your credentials.");
         setFormData((prev) => ({ ...prev, password: "" })); // Reset password on error
       }
     } catch (error) {
