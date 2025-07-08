@@ -3,12 +3,12 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toasts
 import { resetPasswordRequest } from "../Apiservice/allApi";
 import { ArrowLeft } from "lucide-react"; // Import icon
- 
+
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [emailError, setEmailError] = useState("");
-    
+
     // Form validation
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,14 +34,14 @@ const ForgotPassword = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validate before submission
         const error = validateEmail(email);
         if (error) {
             setEmailError(error);
             return;
         }
-        
+
         setLoading(true);
         try {
             const result = await resetPasswordRequest({ email });
@@ -75,22 +75,21 @@ const ForgotPassword = () => {
                             <span>Back to Login</span>
                         </a>
                     </div>
-                    
+
                     <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Forgot Password</h2>
-                    
+
                     <p className="text-gray-600 mb-6 text-center">
                         Enter your email address and we'll send you a link to reset your password.
                     </p>
-                    
+
                     <form onSubmit={handleSubmit}>
                         <div className="mb-6">
                             <label className="block text-gray-700 font-medium mb-2">Email Address</label>
                             <input
                                 type="email"
                                 placeholder="Enter your email"
-                                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                                    emailError ? "border-red-500 focus:ring-red-200" : "border-gray-300 focus:ring-blue-200"
-                                }`}
+                                className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 ${emailError ? "border-red-500 focus:ring-red-200" : "border-gray-300 focus:ring-blue-200"
+                                    }`}
                                 value={email}
                                 onChange={handleEmailChange}
                                 disabled={loading}
@@ -99,7 +98,7 @@ const ForgotPassword = () => {
                                 <p className="mt-1 text-red-500 text-sm">{emailError}</p>
                             )}
                         </div>
-                        
+
                         <div className="mt-6">
                             <button
                                 type="submit"
